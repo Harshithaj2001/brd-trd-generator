@@ -52,6 +52,9 @@ code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gld)}
 .jt{display:flex;justify-content:flex-end;margin-bottom:.4rem}
 .cb{font-size:12px;padding:4px 11px;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;color:var(--mut);cursor:pointer;font-family:'DM Sans',sans-serif}
 .jb{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:1rem;font-family:'DM Mono',monospace;font-size:12px;overflow:auto;max-height:400px;white-space:pre-wrap;color:#9fa3b8;line-height:1.6}
+.api-box{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.api-lbl{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+.api-input{width:100%;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:9px 13px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;outline:none}
 @media(max-width:600px){.g2{grid-template-columns:1fr}.pg{padding:1.5rem 1rem 4rem}}
 </style>
 </head>
@@ -59,23 +62,32 @@ code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gld)}
 <div class="pg">
   <h1>BRD & TRD Generator</h1>
   <p class="sub">Enter your project details — get a complete requirements document instantly.</p>
+
+  <div class="api-box">
+    <div class="api-lbl">OpenAI API Key</div>
+    <input class="api-input" type="password" id="apikey" placeholder="sk-proj-..." autocomplete="off"/>
+    <div style="font-size:11px;color:var(--mut);margin-top:.4rem">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--ac2)">platform.openai.com/api-keys</a></div>
+  </div>
+
   <div class="card">
     <div class="card-ttl">Project Details</div>
     <div class="g2">
-      <div class="f"><label>Project Name</label><input id="fn" placeholder="e.g. HireIQ"/></div>
-      <div class="f"><label>Industry</label><input id="fi" placeholder="e.g. HR / Recruitment"/></div>
+      <div class="f"><label>Project Name</label><input id="fn" placeholder="e.g. MediLib"/></div>
+      <div class="f"><label>Industry</label><input id="fi" placeholder="e.g. Healthcare"/></div>
     </div>
     <div class="f"><label>Description</label><textarea id="fd" rows="3" placeholder="What does this project do?"></textarea></div>
     <div class="g2">
-      <div class="f"><label>Target Users</label><input id="fu" placeholder="e.g. Enterprise HR teams"/></div>
+      <div class="f"><label>Target Users</label><input id="fu" placeholder="e.g. Doctors, nurses"/></div>
       <div class="f"><label>Deadline</label><input id="fdl" placeholder="e.g. 6 weeks"/></div>
     </div>
-    <div class="f"><label>Key Features</label><textarea id="ff" rows="2" placeholder="Resume screening, JD generator..."></textarea></div>
+    <div class="f"><label>Key Features</label><textarea id="ff" rows="2" placeholder="Book search, AI summary..."></textarea></div>
     <div class="f"><label>Tech Stack</label><input id="ft" placeholder="e.g. React, Node.js, PostgreSQL"/></div>
   </div>
+
   <button class="btn" id="gb" onclick="go()">Generate BRD & TRD →</button>
   <div class="prog" id="pw"><div class="prog-bar" id="pb"></div></div>
   <div class="st" id="st"></div>
+
   <div class="out" id="out">
     <div class="tabs">
       <button class="tab active" onclick="sw('brd',this)">BRD</button>
@@ -88,7 +100,6 @@ code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gld)}
   </div>
 </div>
 <script>
-var K='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';
 var lj=null;
 function sw(n,e){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));e.classList.add('active');document.getElementById('p-'+n).classList.add('active')}
 function bc(m){return{POST:'bp',GET:'bg',PUT:'bu',PATCH:'bu',DELETE:'bp'}[m]||'bp'}
@@ -104,9 +115,11 @@ function rT(t){
 function cj(){if(!lj)return;navigator.clipboard.writeText(JSON.stringify(lj,null,2)).then(()=>{var b=document.querySelector('.cb');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000)})}
 function sp(p){document.getElementById('pb').style.width=p+'%'}
 async function go(){
+  var apiKey=document.getElementById('apikey').value.trim();
   var name=document.getElementById('fn').value.trim();
   var desc=document.getElementById('fd').value.trim();
   var st=document.getElementById('st');
+  if(!apiKey){st.className='st err';st.textContent='Please enter your OpenAI API key.';return}
   if(!name||!desc){st.className='st err';st.textContent='Project name and description are required.';return}
   var btn=document.getElementById('gb');
   btn.disabled=true;
@@ -116,13 +129,17 @@ async function go(){
   var steps=['Analysing details...','Structuring requirements...','Generating BRD...','Generating TRD...','Finalising...'];
   var si=0;st.className='st';st.textContent=steps[0];
   var tk=setInterval(()=>{si=(si+1)%steps.length;st.textContent=steps[si];sp(Math.min(85,(si+1)*17))},2000);
-  var pr='You are a strict Business Analyst and Software Architect. Generate a comprehensive BRD and TRD. Return ONLY valid raw JSON, no markdown, no explanation.\nPROJECT: Name:'+name+', Industry:'+(document.getElementById('fi').value.trim()||'N/A')+', Description:'+desc+', Users:'+(document.getElementById('fu').value.trim()||'N/A')+', Features:'+(document.getElementById('ff').value.trim()||'N/A')+', Tech:'+(document.getElementById('ft').value.trim()||'N/A')+', Deadline:'+(document.getElementById('fdl').value.trim()||'N/A')+'\nReturn this JSON structure: {"brd":{"project_overview":"","business_objective":"","stakeholders":[],"business_requirements":[],"functional_requirements":[],"success_metrics":[],"risks":[]},"trd":{"system_overview":"","architecture":"","technology_stack":[{"layer":"","tech":""}],"database_design":[{"table":"","columns":""}],"api_requirements":[{"method":"","endpoint":"","desc":""}],"security_requirements":[],"deployment_plan":""}}';
+  var pr='You are a strict Business Analyst and Software Architect. Generate a comprehensive BRD and TRD. Return ONLY valid raw JSON, no markdown, no explanation.\nPROJECT: Name:'+name+', Industry:'+(document.getElementById('fi').value.trim()||'N/A')+', Description:'+desc+', Users:'+(document.getElementById('fu').value.trim()||'N/A')+', Features:'+(document.getElementById('ff').value.trim()||'N/A')+', Tech:'+(document.getElementById('ft').value.trim()||'N/A')+', Deadline:'+(document.getElementById('fdl').value.trim()||'N/A')+'\nReturn this JSON: {"brd":{"project_overview":"","business_objective":"","stakeholders":[],"business_requirements":[],"functional_requirements":[],"success_metrics":[],"risks":[]},"trd":{"system_overview":"","architecture":"","technology_stack":[{"layer":"","tech":""}],"database_design":[{"table":"","columns":""}],"api_requirements":[{"method":"","endpoint":"","desc":""}],"security_requirements":[],"deployment_plan":""}}';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':K,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:pr}]})});
+    var r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:pr}],temperature:0.3})
+    });
     clearInterval(tk);
     if(!r.ok){var e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+r.status)}
     var d=await r.json();
-    var txt=d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    var txt=d.choices[0].message.content.replace(/```json|```/g,'').trim();
     var data=JSON.parse(txt);
     lj=data;rB(data.brd);rT(data.trd);
     document.getElementById('jb').textContent=JSON.stringify(data,null,2);
