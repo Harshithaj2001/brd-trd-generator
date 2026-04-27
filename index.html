@@ -88,7 +88,7 @@ code{font-family:'DM Mono',monospace;font-size:12px;color:var(--gld)}
   </div>
 </div>
 <script>
-var K='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';
+var K='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';
 var lj=null;
 function sw(n,e){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));e.classList.add('active');document.getElementById('p-'+n).classList.add('active')}
 function bc(m){return{POST:'bp',GET:'bg',PUT:'bu',PATCH:'bu',DELETE:'bp'}[m]||'bp'}
@@ -118,7 +118,7 @@ async function go(){
   var tk=setInterval(()=>{si=(si+1)%steps.length;st.textContent=steps[si];sp(Math.min(85,(si+1)*17))},2000);
   var pr='You are a strict Business Analyst and Software Architect. Generate a comprehensive BRD and TRD. Return ONLY valid raw JSON, no markdown, no explanation.\nPROJECT: Name:'+name+', Industry:'+(document.getElementById('fi').value.trim()||'N/A')+', Description:'+desc+', Users:'+(document.getElementById('fu').value.trim()||'N/A')+', Features:'+(document.getElementById('ff').value.trim()||'N/A')+', Tech:'+(document.getElementById('ft').value.trim()||'N/A')+', Deadline:'+(document.getElementById('fdl').value.trim()||'N/A')+'\nReturn this JSON structure: {"brd":{"project_overview":"","business_objective":"","stakeholders":[],"business_requirements":[],"functional_requirements":[],"success_metrics":[],"risks":[]},"trd":{"system_overview":"","architecture":"","technology_stack":[{"layer":"","tech":""}],"database_design":[{"table":"","columns":""}],"api_requirements":[{"method":"","endpoint":"","desc":""}],"security_requirements":[],"deployment_plan":""}}';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':K,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:pr}]})});
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':K,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4000,messages:[{role:'user',content:pr}]})});
     clearInterval(tk);
     if(!r.ok){var e=await r.json().catch(()=>({}));throw new Error(e.error?.message||'HTTP '+r.status)}
     var d=await r.json();
